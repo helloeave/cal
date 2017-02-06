@@ -241,6 +241,55 @@ func TestHoliday(t *testing.T) {
 	}
 }
 
+func TestCalendar_SetWorkingSaturday(t *testing.T) {
+	c := NewCalendar()
+	c.WorkingSaturday = true
+
+	tests := []struct {
+		t    time.Time
+		want bool
+	}{
+		{time.Date(2014, 6, 1, 12, 0, 0, 0, time.UTC), true},
+		{time.Date(2014, 6, 2, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 10, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 14, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 18, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 26, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 27, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 28, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 29, 12, 0, 0, 0, time.UTC), true},
+	}
+
+	for _, test := range tests {
+		got := c.IsWeekend(test.t)
+		if got != test.want {
+			t.Errorf("got: %t; want: %t (%s)", got, test.want, test.t)
+		}
+	}
+
+	c.WorkingSaturday = false
+	tests = []struct {
+		t    time.Time
+		want bool
+	}{
+		{time.Date(2014, 6, 1, 12, 0, 0, 0, time.UTC), true},
+		{time.Date(2014, 6, 2, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 10, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 18, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 26, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 27, 12, 0, 0, 0, time.UTC), false},
+		{time.Date(2014, 6, 14, 12, 0, 0, 0, time.UTC), true},
+	}
+
+	for _, test := range tests {
+		got := IsWeekend(test.t)
+		if got != test.want {
+			t.Errorf("got: %t; want: %t (%s)", got, test.want, test.t)
+		}
+	}
+
+}
+
 func TestWorkdayNearest(t *testing.T) {
 	c := NewCalendar()
 	c.AddHoliday(US_NewYear)

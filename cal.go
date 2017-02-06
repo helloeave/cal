@@ -89,6 +89,7 @@ func JulianDate(t time.Time) float32 {
 type Calendar struct {
 	holidays [13][]Holiday // 0 for offset based holidays, 1-12 for month based
 	Observed ObservedRule
+	WorkingSaturday bool // True if saturday is considered a work day
 }
 
 // NewCalendar creates a new Calendar with no holidays defined.
@@ -103,6 +104,13 @@ func NewCalendar() *Calendar {
 // AddHoliday adds a holiday to the calendar's list.
 func (c *Calendar) AddHoliday(h Holiday) {
 	c.holidays[h.Month] = append(c.holidays[h.Month], h)
+}
+
+// True if the given date is a weekend
+// If this calendar considers saturday to be a work day, only Sunday is a weekend.
+func (c *Calendar) IsWeekend(date time.Time) bool {
+	day := date.Weekday()
+	return (!c.WorkingSaturday && day == time.Saturday) || day == time.Sunday
 }
 
 // IsHoliday reports whether a given date is a holiday. It does not account
@@ -124,7 +132,7 @@ func (c *Calendar) IsHoliday(date time.Time) bool {
 
 // IsWorkday reports whether a given date is a work day (business day).
 func (c *Calendar) IsWorkday(date time.Time) bool {
-	if IsWeekend(date) || c.IsHoliday(date) {
+	if c.IsWeekend(date) || c.IsHoliday(date) {
 		return false
 	}
 
